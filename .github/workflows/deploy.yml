@@ -1,0 +1,84 @@
+name: deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment environment
+        required: true
+        type: choice
+        options:
+          - dev
+      dry_run:
+        description: Create a change set without execution
+        required: true
+        type: boolean
+        default: true
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  STACK_NAME: ${{ vars.STACK_NAME }}
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install and test
+        run: |
+          python -m pip install -r requirements.txt
+          python -m unittest discover
+
+      - name: Setup SAM CLI
+        run: pip install aws-sam-cli
+
+      - name: Validate required variables
+        run: |
+          test -n "$AWS_REGION" || (echo "Missing variable: AWS_REGION" && exit 1)
+          test -n "$STACK_NAME" || (echo "Missing variable: STACK_NAME" && exit 1)
+          test "$AWS_REGION" = "us-east-1" || (echo "AWS_REGION must be us-east-1 (N. Virginia); got $AWS_REGION" && exit 1)
+
+      - name: Configure AWS credentials with OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Validate and build
+        run: |
+          sam validate --lint
+          sam build
+
+      - name: Deploy dry run
+        if: ${{ inputs.dry_run }}
+        run: |
+          sam deploy \
+            --stack-name "$STACK_NAME" \
+            --region "$AWS_REGION" \
+            --resolve-s3 \
+            --no-fail-on-empty-changeset \
+            --no-execute-changeset \
+            --capabilities CAPABILITY_NAMED_IAM
+
+      - name: Deploy
+        if: ${{ !inputs.dry_run }}
+        run: |
+          sam deploy \
+            --stack-name "$STACK_NAME" \
+            --region "$AWS_REGION" \
+            --resolve-s3 \
+            --no-fail-on-empty-changeset \
+            --capabilities CAPABILITY_NAMED_IAM
