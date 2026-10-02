@@ -1,0 +1,135 @@
+:root {
+  --nci-blue: #0f6a9c;
+  --nci-dark-text: #1a1a1a;
+  --nci-border: #dfe3e8;
+  --nci-bg: #f7f9fb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  color: var(--nci-dark-text);
+  background: var(--nci-bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header */
+.nci-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border-bottom: 1px solid var(--nci-border);
+  padding: 0.75rem 1.5rem;
+  flex-wrap: wrap;
+}
+
+.nci-header__brand img {
+  display: block;
+  height: 48px;
+  width: auto;
+}
+
+.nci-header__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--nci-dark-text);
+}
+
+/* Main content */
+.nci-main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+.nci-card {
+  background: #ffffff;
+  border: 1px solid var(--nci-border);
+  border-radius: 8px;
+  padding: 2.5rem;
+  max-width: 640px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.nci-card h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2.25rem;
+  color: var(--nci-blue);
+}
+
+.nci-subtitle {
+  margin: 0 0 1.5rem;
+  color: #4a4a4a;
+  font-size: 1.05rem;
+}
+
+.nci-handoff {
+  background: var(--nci-bg);
+  border: 1px dashed var(--nci-border);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+/* Footer */
+.nci-footer {
+  background: var(--nci-blue);
+  color: #ffffff;
+  text-align: center;
+  padding: 1.5rem 2rem 2rem;
+}
+
+.nci-footer__links,
+.nci-footer__orgs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.nci-footer a {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nci-footer a:hover {
+  text-decoration: underline;
+}
+
+.nci-footer__tagline {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.nci-footer__meta {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+@media (max-width: 480px) {
+  .nci-card {
+    padding: 1.5rem;
+  }
+
+  .nci-card h1 {
+    font-size: 1.75rem;
+  }
+}

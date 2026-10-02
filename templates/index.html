@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ program_name }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <header class="nci-header">
+    <div class="nci-header__brand">
+      <a href="https://www.cancer.gov" aria-label="National Cancer Institute home page">
+        <img
+          src="https://www.cancer.gov/profiles/custom/cgov_site/themes/custom/cgov/static/images/design-elements/logos/nci-logo-full.svg"
+          alt="National Cancer Institute"
+        />
+      </a>
+    </div>
+    <div class="nci-header__title">
+      <span>{{ program_name }}</span>
+    </div>
+  </header>
+
+  <main class="nci-main">
+    <div class="nci-card">
+      <h1>Hello, World</h1>
+      <p class="nci-subtitle">{{ description }}</p>
+
+      <div class="nci-handoff">
+        <p>
+          This Hello World page is an example of what the website could look
+          like. Tell the assistant what you want to add next, for example:
+          "add a clock to the page."
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="nci-footer">
+    <div class="nci-footer__links">
+      <a href="#">Home</a>
+      <span>|</span>
+      <a href="#">Policies</a>
+      <span>|</span>
+      <a href="#">HHS Vulnerability Disclosure</a>
+      <span>|</span>
+      <a href="#">Accessibility</a>
+      <span>|</span>
+      <a href="#">Viewing Files</a>
+      <span>|</span>
+      <a href="#">FOIA</a>
+    </div>
+    <div class="nci-footer__orgs">
+      <a href="#">U.S. Department of Health and Human Services</a>
+      <span>|</span>
+      <a href="#">National Institutes of Health</a>
+      <span>|</span>
+      <a href="#">National Cancer Institute</a>
+      <span>|</span>
+      <a href="#">USA.gov</a>
+    </div>
+    <div class="nci-footer__tagline">NIH ... Turning Discovery Into Health&reg;</div>
+    <div class="nci-footer__meta">
+      {{ program_name }} | {{ author_name }} | Published {{ published_date }} |
+      v{{ version }} | {{ environment }}
+    </div>
+  </footer>
+</body>
+</html>
