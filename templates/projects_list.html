@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Projects - {{ program_name }}{% endblock %}
+{% block sidebar_class %}app-sidebar--wide{% endblock %}
+
+{% block sidebar %}
+<div class="people-sidebar">
+  <div class="people-sidebar__header">
+    <span>Projects</span>
+  </div>
+  <div class="people-sidebar__filters">
+    <input type="search" id="project-search" class="people-sidebar__search" placeholder="Search by number/description&hellip;" autocomplete="off">
+    <select id="project-lead-filter" class="people-sidebar__owner-filter">
+      <option value="">All Federal Leads</option>
+      {% for lead in leads %}
+      <option value="{{ lead }}">{{ lead }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <ul class="people-list" id="project-list">
+    {% for project in projects %}
+    <li data-name="{{ (project.number ~ ' ' ~ project.short_description)|lower }}" data-lead="{{ project.federal_lead|default('') }}">
+      <a href="{{ url_for('projects_view', project_id=project.id) }}"
+         class="people-list__item {% if selected and selected.id == project.id %}is-selected{% endif %} {% if application_by_name and project.configuration_item in application_by_name %}has-projects{% endif %}">
+        {{ project.short_description }}
+      </a>
+    </li>
+    {% else %}
+    <li class="people-list__empty">No projects imported yet.</li>
+    {% endfor %}
+  </ul>
+  <div class="people-sidebar__empty-filtered" id="project-list-empty" hidden>No projects match that search/filter.</div>
+</div>
+<script>
+(function () {
+  var search = document.getElementById('project-search');
+  var leadFilter = document.getElementById('project-lead-filter');
+  var items = Array.prototype.slice.call(document.querySelectorAll('#project-list > li[data-name]'));
+  var emptyMessage = document.getElementById('project-list-empty');
+  var SEARCH_KEY = 'projects.search';
+  var LEAD_KEY = 'projects.lead';
+
+  function applyFilters() {
+    var term = search.value.trim().toLowerCase();
+    var lead = leadFilter.value;
+    var visibleCount = 0;
+    items.forEach(function (li) {
+      var matchesName = !term || li.dataset.name.indexOf(term) !== -1;
+      var matchesLead = !lead || li.dataset.lead === lead;
+      var visible = matchesName && matchesLead;
+      li.hidden = !visible;
+      if (visible) visibleCount += 1;
+    });
+    emptyMessage.hidden = visibleCount !== 0;
+    sessionStorage.setItem(SEARCH_KEY, search.value);
+    sessionStorage.setItem(LEAD_KEY, leadFilter.value);
+  }
+
+  search.value = sessionStorage.getItem(SEARCH_KEY) || '';
+  var savedLead = sessionStorage.getItem(LEAD_KEY) || '';
+  if (savedLead && Array.prototype.some.call(leadFilter.options, function (o) { return o.value === savedLead; })) {
+    leadFilter.value = savedLead;
+  }
+
+  search.addEventListener('input', applyFilters);
+  leadFilter.addEventListener('change', applyFilters);
+  applyFilters();
+})();
+</script>
+{% endblock %}
+
+
+{% block main %}
+{% if selected %}
+<div class="nci-card nci-card--form">
+  <h2>
+    <a href="https://service.cancer.gov/sc_req_item.do?sysparm_query=number={{ selected.number }}&sysparm_view=esr&sysparm_view_forced=true" target="_blank" rel="noopener">{{ selected.number }}</a>
+  </h2>
+  <dl class="person-details">
+    {% if selected.short_description %}
+    <dt>Short description</dt>
+    <dd>{{ selected.short_description }}</dd>
+    {% endif %}
+    {% if selected.federal_lead %}
+    <dt>Federal Lead</dt>
+    <dd>{{ selected.federal_lead }}</dd>
+    {% endif %}
+    {% if selected.configuration_item %}
+    <dt>Configuration item</dt>
+    <dd>
+      {% if application_by_name and selected.configuration_item in application_by_name %}
+      <a href="{{ url_for('applications_view', application_id=application_by_name[selected.configuration_item]) }}">{{ selected.configuration_item }}</a>
+      {% else %}
+      {{ selected.configuration_item }}
+      {% endif %}
+    </dd>
+    {% endif %}
+    {% if selected.stage %}
+    <dt>Stage</dt>
+    <dd>{{ selected.stage }}</dd>
+    {% endif %}
+    {% if selected.state %}
+    <dt>State</dt>
+    <dd>{{ selected.state }}</dd>
+    {% endif %}
+    {% if selected.approval %}
+    <dt>Approval</dt>
+    <dd>{{ selected.approval }}</dd>
+    {% endif %}
+  </dl>
+</div>
+{% else %}
+<div class="nci-card">
+  <h1>Projects</h1>
+  <p class="nci-subtitle">Select a project from the list.</p>
+</div>
+{% endif %}
+{% endblock %}

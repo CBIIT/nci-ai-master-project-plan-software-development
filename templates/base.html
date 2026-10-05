@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{ program_name }}</title>
+  <title>{% block title %}{{ program_name }}{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
@@ -21,20 +21,24 @@
     </div>
   </header>
 
-  <main class="nci-main">
-    <div class="nci-card">
-      <h1>Hello, World</h1>
-      <p class="nci-subtitle">{{ description }}</p>
+  <nav class="app-nav">
+    <a href="{{ url_for('people_index') }}" class="app-nav__item {% if active_tab == 'people' %}is-active{% endif %}">People</a>
+    <a href="{{ url_for('applications_index') }}" class="app-nav__item {% if active_tab == 'applications' %}is-active{% endif %}">Applications</a>
+    <a href="{{ url_for('projects_index') }}" class="app-nav__item {% if active_tab == 'projects' %}is-active{% endif %}">Projects</a>
+    <a href="#" class="app-nav__item {% if active_tab == 'tasks' %}is-active{% endif %}">Tasks</a>
+    <a href="#" class="app-nav__item {% if active_tab == 'views' %}is-active{% endif %}">Views</a>
+    <a href="{{ url_for('admin_index') }}" class="app-nav__item {% if active_tab == 'admin' %}is-active{% endif %}">Admin</a>
+  </nav>
 
-      <div class="nci-handoff">
-        <p>
-          This Hello World page is an example of what the website could look
-          like. Tell the assistant what you want to add next, for example:
-          "add a clock to the page."
-        </p>
-      </div>
-    </div>
-  </main>
+  <div class="app-layout">
+    <aside class="app-sidebar {% block sidebar_class %}{% endblock %}">
+      {% block sidebar %}{% endblock %}
+    </aside>
+
+    <main class="app-main">
+      {% block main %}{% endblock %}
+    </main>
+  </div>
 
   <footer class="nci-footer">
     <div class="nci-footer__links">

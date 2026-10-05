@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Admin - {{ program_name }}{% endblock %}
+
+{% block main %}
+<div class="nci-card">
+  <h1>Admin</h1>
+
+  {% if import_error %}
+  <p class="nci-subtitle nci-subtitle--error">Import failed: {{ import_error }}</p>
+  {% elif reset_type %}
+  <p class="nci-subtitle">Cleared all {{ reset_type }}.</p>
+  {% elif imported_count is not none %}
+  <p class="nci-subtitle">
+    Imported {{ imported_count }} {{ imported_type }}.
+    {% if skipped_count and skipped_count != '0' %}Skipped {{ skipped_count }} row(s) missing a required field.{% endif %}
+  </p>
+  {% endif %}
+
+  <h2>Applications</h2>
+  <p>Currently {{ application_count }} applications. Import a ServiceNow CMDB Business Application CSV export (<code>cmdb_ci_business_app.csv</code>).</p>
+  <form action="{{ url_for('admin_import_applications') }}" method="post" enctype="multipart/form-data">
+    <input type="file" name="csv_file" accept=".csv" required>
+    <button type="submit">Import Applications CSV</button>
+  </form>
+  <form action="{{ url_for('admin_reset_applications') }}" method="post" onsubmit="return confirm('Delete all {{ application_count }} applications? This cannot be undone.');">
+    <button type="submit" class="nci-button--danger">Reset Applications list</button>
+  </form>
+
+  <h2>Projects</h2>
+  <p>Currently {{ project_count }} projects. Import the "ESRsWithLeads.xlsx" ServiceNow export.</p>
+  <form action="{{ url_for('admin_import_projects') }}" method="post" enctype="multipart/form-data">
+    <input type="file" name="xlsx_file" accept=".xlsx" required>
+    <button type="submit">Import Projects XLSX</button>
+  </form>
+  <form action="{{ url_for('admin_reset_projects') }}" method="post" onsubmit="return confirm('Delete all {{ project_count }} projects? This cannot be undone.');">
+    <button type="submit" class="nci-button--danger">Reset Projects list</button>
+  </form>
+</div>
+{% endblock %}

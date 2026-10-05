@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Applications - {{ program_name }}{% endblock %}
+{% block sidebar_class %}app-sidebar--wide{% endblock %}
+
+{% block sidebar %}
+<div class="people-sidebar">
+  <div class="people-sidebar__header">
+    <span>Applications</span>
+  </div>
+  <div class="people-sidebar__filters">
+    <input type="search" id="app-search" class="people-sidebar__search" placeholder="Search by name&hellip;" autocomplete="off">
+    <select id="app-owner-filter" class="people-sidebar__owner-filter">
+      <option value="">All Federal IT System Owners</option>
+      {% for owner in owners %}
+      <option value="{{ owner }}">{{ owner }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <ul class="people-list" id="app-list">
+    {% for application in applications %}
+    <li data-name="{{ application.name|lower }}" data-owner="{{ application.it_application_owner|default('') }}">
+      <a href="{{ url_for('applications_view', application_id=application.id) }}"
+         class="people-list__item {% if selected and selected.id == application.id %}is-selected{% endif %} {% if application.name in application_names_with_projects %}has-projects{% endif %}">
+        {{ application.name }}
+      </a>
+    </li>
+    {% else %}
+    <li class="people-list__empty">No applications imported yet.</li>
+    {% endfor %}
+  </ul>
+  <div class="people-sidebar__empty-filtered" id="app-list-empty" hidden>No applications match that search/filter.</div>
+</div>
+<script>
+(function () {
+  var search = document.getElementById('app-search');
+  var ownerFilter = document.getElementById('app-owner-filter');
+  var items = Array.prototype.slice.call(document.querySelectorAll('#app-list > li[data-name]'));
+  var emptyMessage = document.getElementById('app-list-empty');
+  var SEARCH_KEY = 'applications.search';
+  var OWNER_KEY = 'applications.owner';
+
+  function applyFilters() {
+    var term = search.value.trim().toLowerCase();
+    var owner = ownerFilter.value;
+    var visibleCount = 0;
+    items.forEach(function (li) {
+      var matchesName = !term || li.dataset.name.indexOf(term) !== -1;
+      var matchesOwner = !owner || li.dataset.owner === owner;
+      var visible = matchesName && matchesOwner;
+      li.hidden = !visible;
+      if (visible) visibleCount += 1;
+    });
+    emptyMessage.hidden = visibleCount !== 0;
+    sessionStorage.setItem(SEARCH_KEY, search.value);
+    sessionStorage.setItem(OWNER_KEY, ownerFilter.value);
+  }
+
+  search.value = sessionStorage.getItem(SEARCH_KEY) || '';
+  var savedOwner = sessionStorage.getItem(OWNER_KEY) || '';
+  if (savedOwner && Array.prototype.some.call(ownerFilter.options, function (o) { return o.value === savedOwner; })) {
+    ownerFilter.value = savedOwner;
+  }
+
+  search.addEventListener('input', applyFilters);
+  ownerFilter.addEventListener('change', applyFilters);
+  applyFilters();
+})();
+</script>
+{% endblock %}
+
+
+{% block main %}
+{% if selected %}
+<div class="nci-card nci-card--form">
+  <h2>{{ selected.name }}</h2>
+  <dl class="person-details">
+    {% if selected.acronym %}
+    <dt>Acronym</dt>
+    <dd>{{ selected.acronym }}</dd>
+    {% endif %}
+    {% if selected.description %}
+    <dt>Description</dt>
+    <dd>{{ selected.description }}</dd>
+    {% endif %}
+    {% if selected.url %}
+    <dt>Application URL</dt>
+    <dd><a href="{{ selected.url }}">{{ selected.url }}</a></dd>
+    {% endif %}
+    {% if selected.status %}
+    <dt>Status</dt>
+    <dd>{{ selected.status }}</dd>
+    {% endif %}
+    {% if selected.it_application_owner %}
+    <dt>Federal IT System Owner</dt>
+    <dd>{{ selected.it_application_owner }}</dd>
+    {% endif %}
+    {% if selected.support_group %}
+    <dt>Support group</dt>
+    <dd>{{ selected.support_group }}</dd>
+    {% endif %}
+    {% if selected.code_repository %}
+    <dt>Code repository</dt>
+    <dd><a href="{{ selected.code_repository }}">{{ selected.code_repository }}</a></dd>
+    {% endif %}
+    {% if linked_projects %}
+    <dt>Projects</dt>
+    <dd>
+      <ul class="person-details__list">
+        {% for project in linked_projects %}
+        <li><a href="{{ url_for('projects_view', project_id=project.id) }}">{{ project.short_description }}</a></li>
+        {% endfor %}
+      </ul>
+    </dd>
+    {% endif %}
+  </dl>
+</div>
+{% else %}
+<div class="nci-card">
+  <h1>Applications</h1>
+  <p class="nci-subtitle">Select an application from the list.</p>
+</div>
+{% endif %}
+{% endblock %}
