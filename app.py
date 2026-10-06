@@ -4,7 +4,7 @@ import io
 from flask import Flask, abort, redirect, render_template, request, url_for
 
 import db
-from importers import MissingColumnsError, parse_applications_csv, parse_projects_xlsx
+from importers import MissingColumnsError, parse_applications_csv, parse_projects_csv, parse_projects_xlsx
 
 app = Flask(__name__)
 
@@ -24,6 +24,15 @@ db.seed_if_empty(
         {"first_name": "Priya", "last_name": "Natarajan", "nih_email": "priya.natarajan@nih.gov"},
     ]
 )
+
+
+@app.template_filter("stage_shorthand")
+def stage_shorthand(stage):
+    """Abbreviate a project Stage to its word initials, e.g. "Engineering
+    Project Execution" -> "EPE", for compact display in the sidebar list."""
+    if not stage:
+        return ""
+    return "".join(word[0].upper() for word in stage.split() if word[0].isalpha())
 
 
 @app.context_processor
@@ -213,11 +222,14 @@ def admin_import_applications():
 
 @app.route("/admin/import/projects", methods=["POST"])
 def admin_import_projects():
-    upload = request.files.get("xlsx_file")
+    upload = request.files.get("projects_file")
     if not upload or not upload.filename:
         abort(400)
     try:
-        result = parse_projects_xlsx(io.BytesIO(upload.read()))
+        if upload.filename.lower().endswith(".csv"):
+            result = parse_projects_csv(io.TextIOWrapper(upload.stream, encoding="cp1252"))
+        else:
+            result = parse_projects_xlsx(io.BytesIO(upload.read()))
     except MissingColumnsError as e:
         return redirect(url_for("admin_index", error=str(e)))
     for fields in result.records:

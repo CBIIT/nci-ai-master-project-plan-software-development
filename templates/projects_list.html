@@ -21,6 +21,7 @@
     <li data-name="{{ (project.number ~ ' ' ~ project.short_description)|lower }}" data-lead="{{ project.federal_lead|default('') }}">
       <a href="{{ url_for('projects_view', project_id=project.id) }}"
          class="people-list__item {% if selected and selected.id == project.id %}is-selected{% endif %} {% if application_by_name and project.configuration_item in application_by_name %}has-projects{% endif %}">
+        {% if project.stage %}<span class="stage-badge" title="{{ project.stage }}">{{ project.stage|stage_shorthand }}</span>{% endif %}
         {{ project.short_description }}
       </a>
     </li>

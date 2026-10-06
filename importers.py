@@ -19,7 +19,7 @@ APPLICATIONS_FIELD_MAP = {
 }
 APPLICATIONS_REQUIRED_COLUMNS = ["name"]
 
-PROJECTS_FIELD_MAP = {
+PROJECTS_XLSX_FIELD_MAP = {
     "Short description": "short_description",
     "Federal Lead": "federal_lead",
     "Number": "number",
@@ -28,7 +28,21 @@ PROJECTS_FIELD_MAP = {
     "State": "state",
     "Approval": "approval",
 }
-PROJECTS_REQUIRED_COLUMNS = ["Number"]
+PROJECTS_XLSX_REQUIRED_COLUMNS = ["Number"]
+
+# ServiceNow CSV export of sc_req_item with the OCIO Federal Lead catalog
+# variable (identified by its sys_id) included as a column, covering all
+# Federal Leads in one export instead of one pull per person.
+PROJECTS_CSV_FIELD_MAP = {
+    "number": "number",
+    "short_description": "short_description",
+    "variables.353504b61be56110f360a681f54bcbd5": "federal_lead",
+    "stage": "stage",
+    "state": "state",
+    "approval": "approval",
+    "cmdb_ci": "configuration_item",
+}
+PROJECTS_CSV_REQUIRED_COLUMNS = ["number"]
 
 # records: list of field dicts ready for db.create_*(**fields)
 # skipped: count of data rows dropped because a required column was blank
@@ -68,7 +82,7 @@ def parse_projects_xlsx(file_obj):
     rows = sheet.iter_rows(values_only=True)
     header = [str(cell).strip() if cell is not None else "" for cell in next(rows)]
 
-    missing = [c for c in PROJECTS_REQUIRED_COLUMNS if c not in header]
+    missing = [c for c in PROJECTS_XLSX_REQUIRED_COLUMNS if c not in header]
     if missing:
         raise MissingColumnsError(f"Spreadsheet is missing required column(s): {', '.join(missing)}")
 
@@ -78,8 +92,31 @@ def parse_projects_xlsx(file_obj):
         row_dict = dict(zip(header, row))
         fields = {
             target: str(row_dict[source]).strip()
-            for source, target in PROJECTS_FIELD_MAP.items()
+            for source, target in PROJECTS_XLSX_FIELD_MAP.items()
             if row_dict.get(source) not in (None, "")
+        }
+        if fields.get("number"):
+            projects.append(fields)
+        else:
+            skipped += 1
+    return ImportResult(projects, skipped)
+
+
+def parse_projects_csv(file_obj):
+    """file_obj: text-mode file-like object, e.g. a ServiceNow sc_req_item
+    CSV export (with the OCIO Federal Lead variable included by sys_id)."""
+    reader = csv.DictReader(file_obj)
+    missing = [c for c in PROJECTS_CSV_REQUIRED_COLUMNS if c not in (reader.fieldnames or [])]
+    if missing:
+        raise MissingColumnsError(f"CSV is missing required column(s): {', '.join(missing)}")
+
+    projects = []
+    skipped = 0
+    for row in reader:
+        fields = {
+            target: row[source].strip()
+            for source, target in PROJECTS_CSV_FIELD_MAP.items()
+            if row.get(source, "").strip()
         }
         if fields.get("number"):
             projects.append(fields)

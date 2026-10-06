@@ -27,10 +27,10 @@
   </form>
 
   <h2>Projects</h2>
-  <p>Currently {{ project_count }} projects. Import the "ESRsWithLeads.xlsx" ServiceNow export.</p>
+  <p>Currently {{ project_count }} projects. Import a ServiceNow sc_req_item CSV export (with the OCIO Federal Lead column), or the older "ESRsWithLeads.xlsx" format.</p>
   <form action="{{ url_for('admin_import_projects') }}" method="post" enctype="multipart/form-data">
-    <input type="file" name="xlsx_file" accept=".xlsx" required>
-    <button type="submit">Import Projects XLSX</button>
+    <input type="file" name="projects_file" accept=".csv,.xlsx" required>
+    <button type="submit">Import Projects</button>
   </form>
   <form action="{{ url_for('admin_reset_projects') }}" method="post" onsubmit="return confirm('Delete all {{ project_count }} projects? This cannot be undone.');">
     <button type="submit" class="nci-button--danger">Reset Projects list</button>
