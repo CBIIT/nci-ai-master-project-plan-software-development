@@ -21,6 +21,8 @@
     <li data-name="{{ (project.number ~ ' ' ~ project.short_description)|lower }}" data-lead="{{ project.federal_lead|default('') }}">
       <a href="{{ url_for('projects_view', project_id=project.id) }}"
          class="people-list__item {% if selected and selected.id == project.id %}is-selected{% endif %} {% if application_by_name and project.configuration_item in application_by_name %}has-projects{% endif %}">
+        {% set timeline = project|timeline_status %}
+        {% if timeline %}<span class="timeline-dot timeline-dot--{{ timeline }}" title="Planned {{ project.planned_start_date }} - {{ project.planned_end_date }}"></span>{% endif %}
         {% if project.stage %}<span class="stage-badge" title="{{ project.stage }}">{{ project.stage|stage_shorthand }}</span>{% endif %}
         {{ project.short_description }}
       </a>
@@ -98,6 +100,20 @@
     {% if selected.stage %}
     <dt>Stage</dt>
     <dd>{{ selected.stage }}</dd>
+    {% endif %}
+    {% if selected.planned_start_date or selected.planned_end_date %}
+    <dt>Planned dates</dt>
+    <dd>
+      {{ selected.planned_start_date|default('?') }} - {{ selected.planned_end_date|default('?') }}
+      {% set timeline = selected|timeline_status %}
+      {% if timeline == 'on-track' %}
+      <span class="timeline-dot timeline-dot--on-track"></span> Today is within the planned dates
+      {% elif timeline == 'upcoming' %}
+      <span class="timeline-dot timeline-dot--upcoming"></span> Not started yet
+      {% elif timeline == 'past-due' %}
+      <span class="timeline-dot timeline-dot--past-due"></span> Past the planned end date
+      {% endif %}
+    </dd>
     {% endif %}
     {% if selected.state %}
     <dt>State</dt>

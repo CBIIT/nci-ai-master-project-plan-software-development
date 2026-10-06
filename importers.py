@@ -37,6 +37,8 @@ PROJECTS_CSV_FIELD_MAP = {
     "number": "number",
     "short_description": "short_description",
     "variables.353504b61be56110f360a681f54bcbd5": "federal_lead",
+    "variables.a593387e1b696110f360a681f54bcb71": "planned_start_date",
+    "variables.7ab3f0be1b696110f360a681f54bcb96": "planned_end_date",
     "stage": "stage",
     "state": "state",
     "approval": "approval",

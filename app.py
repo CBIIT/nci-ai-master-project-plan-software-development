@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 import io
 
 from flask import Flask, abort, redirect, render_template, request, url_for
@@ -33,6 +33,31 @@ def stage_shorthand(stage):
     if not stage:
         return ""
     return "".join(word[0].upper() for word in stage.split() if word[0].isalpha())
+
+
+def _parse_mdy_date(value):
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value, "%m/%d/%Y").date()
+    except ValueError:
+        return None
+
+
+@app.template_filter("timeline_status")
+def timeline_status(project):
+    """Whether today falls before, within, or after a project's Planned
+    Start/End Date range. Returns None if either date is missing/unparseable."""
+    start = _parse_mdy_date(project.get("planned_start_date"))
+    end = _parse_mdy_date(project.get("planned_end_date"))
+    if not start or not end:
+        return None
+    today = date.today()
+    if today < start:
+        return "upcoming"
+    if today > end:
+        return "past-due"
+    return "on-track"
 
 
 @app.context_processor
